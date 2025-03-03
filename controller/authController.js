@@ -5,7 +5,20 @@ const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "1h" });
 };
 
-const getUserInfo = async (req, res) => {};
+const getUserInfo = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select("-password");
+    if (!user) {
+      return res.status(404).json({ message: "user not found" });
+    }
+    res.status(200).json(user);
+  } catch (err) {
+    res.status(500).json({
+      message: "error fetching user",
+      error: err.message,
+    });
+  }
+};
 const registerUser = async (req, res) => {
   const { fullName, email, password, profileImageUrl } = req.body;
   if (!fullName || !email || !password) {
